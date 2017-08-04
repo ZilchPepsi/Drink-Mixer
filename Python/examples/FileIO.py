@@ -1,0 +1,5 @@
+file = open("threads.py", 'r')
+print(file.read())
+file.seek(0)
+print(file.read(5))
+file.close()
