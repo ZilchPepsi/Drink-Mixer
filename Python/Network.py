@@ -1,3 +1,8 @@
+##TODO#########################
+## when connection is dropped, set a signal somewhere
+###############################
+
+
 import socket
 import threading
 import array
@@ -5,7 +10,7 @@ import array
 #########################
 # Globals
 #########################
-TIMEOUT = 10
+TIMEOUT = 2
 
 #########################
 # BITMASKS
@@ -54,15 +59,20 @@ class Network(threading.Thread):
         self.sendLock.acquire()
         length = len(self.toSend)
         for _ in range(length):
-                    c.send(self.toSend.pop(0).encode('utf-8'))
+            try:
+                c.send(self.toSend.pop(0).encode('utf-8'))
+            except ConnectionResetError: #TODO set flag
+                pass
         self.sendLock.release()
-            
+
+    #INTERNAL       
     def run(self):
         self.active = True
         self.sock.bind((self.host,self.port))
         self.sock.listen(1)
         c, addr = self.sock.accept()
         c.settimeout(TIMEOUT)
+        self.sock.close()
 
         #main loop
         while self.active:
@@ -71,12 +81,17 @@ class Network(threading.Thread):
                 data = c.recv(1024)#TODO shouldn't just grab 1024
             except socket.timeout:
                 pass
+            except ConnectionResetError: #TODO set flag
+                print("got a ConnectionResetError")
             if data != b'':
-                #do stuff here with data received
+                self.receivedLock.acquire()
                 self.received.append(data.strip().decode('utf-8'))
+                self.receivedLock.release()
             if len(self.toSend) !=0:
                 self.sendMessages(c)
-    
+        c.shutdown(socket.SHUT_RDWR)
+        c.close()
+       
             
     def shutdown(self):
         self.active = False

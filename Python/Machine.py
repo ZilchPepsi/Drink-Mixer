@@ -21,23 +21,31 @@ SleepTimeL = 0.5
 # main loop
 
 try:
-  GPIO.output(2, GPIO.LOW)
-  print( "ONE")
-  time.sleep(SleepTimeL); 
-  GPIO.output(3, GPIO.LOW)
-  print ("TWO")
-  time.sleep(SleepTimeL);  
-  GPIO.output(4, GPIO.LOW)
-  print ("THREE")
-  time.sleep(SleepTimeL);
-  GPIO.output(17, GPIO.LOW)
-  print ("FOUR")
-  time.sleep(SleepTimeL);
-  GPIO.output(27, GPIO.LOW)
-  print ("FIVE")
-  time.sleep(SleepTimeL);
-  GPIO.output(22, GPIO.LOW)
-  print ("SIX")
+    x = 0
+    for i in pinList:
+        x++
+        GPIO.output(i, GPIO.LOW)
+        print(x)
+        time.sleep(SleepTimeL)
+    GPIO.cleanup()
+    print("Good bye!")
+  #GPIO.output(2, GPIO.LOW)
+  #print( "ONE")
+  #time.sleep(SleepTimeL); 
+  #GPIO.output(3, GPIO.LOW)
+  #print ("TWO")
+  #time.sleep(SleepTimeL);  
+  #GPIO.output(4, GPIO.LOW)
+  #print ("THREE")
+  #time.sleep(SleepTimeL);
+  #GPIO.output(17, GPIO.LOW)
+  #print ("FOUR")
+  #time.sleep(SleepTimeL);
+  #GPIO.output(27, GPIO.LOW)
+  #print ("FIVE")
+  #time.sleep(SleepTimeL);
+  #GPIO.output(22, GPIO.LOW)
+  #print ("SIX")
   #time.sleep(SleepTimeL);
   #GPIO.output(10, GPIO.LOW)
   #print "SEVEN"
