@@ -28,8 +28,11 @@ class CustomAdaptor(val drinkList: ArrayList<Drink>) : RecyclerView.Adapter<Cust
     }
 
     class ViewHolder(v: View) : RecyclerView.ViewHolder(v){
-        val name = v
-        val textViewName = itemView.findViewById(R.id.textViewName) as TextView
-        val textViewAddress = itemView.findViewById(R.id.textViewAddress) as TextView
+        fun bindCustom(forecast: ) {
+            itemView.date.text = forecast.date.toDateString()
+        }
+        // Did not work
+        // val textViewName = itemView.findViewById(R.id.textViewName) as TextView
+        // val textViewAddress = itemView.findViewById(R.id.textViewAddress) as TextView
     }
 }
