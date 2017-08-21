@@ -4,6 +4,7 @@ import android.location.Address
 
 /**
  * Created by emiller on 8/5/17.
+ *
  */
 
-data class Drink(val name: String, val address: String)
+data class Drink(val name: String, val recipe: String)

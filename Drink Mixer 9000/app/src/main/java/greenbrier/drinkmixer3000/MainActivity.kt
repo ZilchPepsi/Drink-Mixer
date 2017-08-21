@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.LinearLayout
 
 import kotlinx.android.synthetic.main.activity_main.*
@@ -17,13 +18,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-        }
-
+        val recyclerView = findViewById<View>(R.id.recyclerView) as RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayout.VERTICAL,false)
 
         val drinks = ArrayList<Drink>()
@@ -41,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         drinks.add(Drink("Cosmopolitan","1/2 oz Fresh lime juice, 1 oz Cranberry juice, 1/2 oz Cointreau, 1 1/2 oz Vodka Citron"))
         drinks.add(Drink("Mai Tai", "1 1/2 oz White rum, 1/2 oz Fresh lime juice, 1/2 oz Orange curaçao, 1/2 oz Orgeat syrup, 3/4 oz Dark rum"))
 
-        val adapter = CustomAdaptor(drinks)
+        val adapter = CustomAdapter(drinks)
 
         recyclerView.adapter = adapter
     }
