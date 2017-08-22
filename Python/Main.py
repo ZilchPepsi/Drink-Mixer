@@ -35,7 +35,6 @@ toSend+=IO.initDone
 
 io.addMessage(toSend.decode("utf-8"))
 
-
 #check network input
 #check machine input
 
