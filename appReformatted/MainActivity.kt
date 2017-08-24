@@ -13,29 +13,31 @@ import android.widget.LinearLayout
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 
-class MainActivity : AppCompatActivity() {
+public class MainActivity : AppCompatActivity()
+ {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?)
+	{
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         val recyclerView = findViewById<View>(R.id.recyclerView) as RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayout.VERTICAL,false)
 
-        ArrayList<Drink> drinks = new ArrayList<Drink>()
+        ArrayList<Drink> drinks = new ArrayList<Drink>();
 
-        drinks.add(Drink("Cuba Libre", "Coca-Cola, lime, and dark or light rum."))
-        drinks.add(Drink("Mojito", "White rum, sugar, lime juice, soda water, and mint."))
-        drinks.add(Drink("Long Island Iced Tea", "1/2 ounce triple sec\n" +
-                                                                    "1/2 ounce light rum\n" +
-                                                                    "1/2 ounce gin\n" +
-                                                                    "1/2 ounce vodka\n" +
-                                                                    "1/2 ounce tequila\n" +
-                                                                    "1-ounce sour mix\n" +
-                                                                    "Cola\n" +
-                                                                    "Lemon wedge for garnish "))
-        drinks.add(Drink("Cosmopolitan","1/2 oz Fresh lime juice, 1 oz Cranberry juice, 1/2 oz Cointreau, 1 1/2 oz Vodka Citron"))
-        drinks.add(Drink("Mai Tai", "1 1/2 oz White rum, 1/2 oz Fresh lime juice, 1/2 oz Orange curaçao, 1/2 oz Orgeat syrup, 3/4 oz Dark rum"))
+        // drinks.add(Drink("Cuba Libre", "Coca-Cola, lime, and dark or light rum."))
+        // drinks.add(Drink("Mojito", "White rum, sugar, lime juice, soda water, and mint."))
+        // drinks.add(Drink("Long Island Iced Tea", "1/2 ounce triple sec\n" +
+                                                                    // "1/2 ounce light rum\n" +
+                                                                    // "1/2 ounce gin\n" +
+                                                                    // "1/2 ounce vodka\n" +
+                                                                    // "1/2 ounce tequila\n" +
+                                                                    // "1-ounce sour mix\n" +
+                                                                    // "Cola\n" +
+                                                                    // "Lemon wedge for garnish "))
+        // drinks.add(Drink("Cosmopolitan","1/2 oz Fresh lime juice, 1 oz Cranberry juice, 1/2 oz Cointreau, 1 1/2 oz Vodka Citron"))
+        // drinks.add(Drink("Mai Tai", "1 1/2 oz White rum, 1/2 oz Fresh lime juice, 1/2 oz Orange curaçao, 1/2 oz Orgeat syrup, 3/4 oz Dark rum"))
 
         val adapter = CustomAdapter(drinks)
 
