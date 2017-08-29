@@ -1,9 +1,4 @@
-s = ''
-s+= 'a'
-s+= str(5)
-print(s)
+s = '12345'
 
-
-var = True
-varS = str(var)
-print(varS)
+print(s[0])
+print(int(s[0]))

@@ -17,7 +17,7 @@ network.start()
 
 #send startup data
 toSend = ''
-toSend +=IO.init+':'
+toSend +=Network.init+':'
 toSend += str(pin)+':'
 
 toSend += str(len(drinks))+':'
@@ -31,14 +31,23 @@ for i in range(len(mixes)):
     for j in range(len(mixes[i].drinks)):
         toSend += mixes[i].drinks[j].name+':'
 
-toSend+=IO.initDone
+toSend+=toSend.initDone
 
-io.addMessage(toSend.decode("utf-8"))
+network.addMessage(toSend.decode("utf-8"))
 
 #check network input
+fromNetwork = network.getReceived()
+if len(fromNetwork) > 0 :
+    for x in range(len(fromNetwork)):
+        interpretNetworkAction(fromNetwork(x))
+        
 #check machine input
-
+    
 
 #clean up
 network.shutdown()
 io.closeFile()
+
+
+def interpretNetworkAction(messages):#TODO
+    pass
