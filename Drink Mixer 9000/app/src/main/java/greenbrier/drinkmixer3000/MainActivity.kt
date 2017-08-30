@@ -1,10 +1,15 @@
 package greenbrier.drinkmixer3000
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.os.AsyncTask
 import android.os.Bundle
 import android.support.design.widget.Snackbar
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -22,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         val recyclerView = findViewById<View>(R.id.recyclerView) as RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayout.VERTICAL,false)
 
-        ArrayList<Drink> drinks = new ArrayList<Drink>()
+        val drinks = ArrayList<Drink>() //val is like final in java
 
         drinks.add(Drink("Cuba Libre", "Coca-Cola, lime, and dark or light rum."))
         drinks.add(Drink("Mojito", "White rum, sugar, lime juice, soda water, and mint."))
@@ -40,6 +45,24 @@ class MainActivity : AppCompatActivity() {
         val adapter = CustomAdapter(drinks)
 
         recyclerView.adapter = adapter
+
+        if( isNetworkConnected())
+        {
+            val net = Network()
+            net.execute("init")
+        }
+        else
+        {
+            Log.d("Network", "Network not connected")
+        }
+
+    }
+
+     fun isNetworkConnected(): Boolean
+     {
+        val connMgr = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo = connMgr.activeNetworkInfo
+        return networkInfo != null && networkInfo.isConnected
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

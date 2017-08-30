@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="greenbrier.drinkmixer3000">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/> <!-- these are for the network -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
