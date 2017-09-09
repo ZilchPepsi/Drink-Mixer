@@ -1,4 +1,3 @@
-s = '12345'
+s = b'\t'
 
 print(s[0])
-print(int(s[0]))

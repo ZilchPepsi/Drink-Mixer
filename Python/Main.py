@@ -1,10 +1,14 @@
 import IO
 import Network
+import time
 
 
 #MAIN LOOP
 io = IO.IO()
 network = Network.Network()
+active = True
+startupString = '';
+
 
 #load file
 pin,drinks,mixes = io.readFile()    #drinks is array of Drink, mixes is
@@ -14,40 +18,64 @@ pin,drinks,mixes = io.readFile()    #drinks is array of Drink, mixes is
 network.start()
 
 
-
 #send startup data
-toSend = ''
-toSend +=Network.init+':'
-toSend += str(pin)+':'
+startupString = ''
+startupString +=str(Network.INIT)+':'
+startupString += str(pin)+':'
 
-toSend += str(len(drinks))+':'
+startupString += str(len(drinks))+':'
 for i in range(len(drinks)):
-    toSend += drinks[i].name+':'+drinks[i].alocholic+':'
+    startupString += drinks[i].name+':'+str(drinks[i].alcoholic)+':'
 
-toSend+= str(len(mixes))+':'
+startupString+= str(len(mixes))+':'
 for i in range(len(mixes)):
-    toSend += mixes[i].name+':'
-    toSend += str(len(mixes[i].drinks))+':'
+    startupString += mixes[i].name+':'
+    startupString += str(len(mixes[i].drinks))+':'
     for j in range(len(mixes[i].drinks)):
-        toSend += mixes[i].drinks[j].name+':'
-
-toSend+=toSend.initDone
-
-network.addMessage(toSend.decode("utf-8"))
-
-#check network input
-fromNetwork = network.getReceived()
-if len(fromNetwork) > 0 :
-    for x in range(len(fromNetwork)):
-        interpretNetworkAction(fromNetwork(x))
-        
-#check machine input
-    
-
-#clean up
-network.shutdown()
-io.closeFile()
+        startupString += mixes[i].drinks[j][0].name+':'
+        startupString += str(mixes[i].drinks[j][1])+':'
 
 
-def interpretNetworkAction(messages):#TODO
-    pass
+try:
+    while active:
+        #check network input
+        fromNetwork = network.getReceived()
+        if len(fromNetwork) > 0 :
+            for x in range(len(fromNetwork)):
+                if int(fromNetwork[x][0]) == Network.HELLO:
+                    print("Got a hello")
+                    network.addMessage(startupString);
+        else:
+            time.sleep(1)
+        #check machine input
+except KeyboardInterrupt:
+    print("Shutting down")
+    network.shutdown()
+    io.closeFile()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   

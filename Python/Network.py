@@ -15,19 +15,19 @@ TIMEOUT = 2
 #########################
 # BITMASKS
 #########################
-makeMix = 0
-addMix = 1
-modifyMix = 2
-deleteMix = 3
+MAKE_MIX = 0
+ADD_MIX = 1
+MODIFY_MIX = 2
+DELETE_MIX = 3
 
-addDrink = 4
-deleteDrink = 5
+ADD_DRINK = 4
+DELETE_DRINK = 5
 
-init = 6
-initDone = 7
+INIT = 6
+INIT_CONFIRM = 8
 
-Hello = 8
-Goodbye = 9
+HELLO = 9
+GOODBYE = 10
 
 class Network(threading.Thread):
 
@@ -61,38 +61,57 @@ class Network(threading.Thread):
         for _ in range(length):
             try:
                 c.send(self.toSend.pop(0).encode('utf-8'))
-            except ConnectionResetError: #TODO set flag
-                pass
+            except ConnectionResetError:
+                self.sendLock.release()
+                raise
         self.sendLock.release()
+
 
     #INTERNAL       
     def run(self):
+        print("starting network thread")
         self.active = True
+
+        c, addr = self.waitForConnect()
+        #main loop
+        while self.active:
+            data = b''
+            try:
+                data = c.recv(1)
+            except socket.timeout:
+                pass
+            except ConnectionResetError:
+                c.shutdown(socket.SHUT_RDWR)
+                c.close()
+                c, addr = self.waitForConnect()
+                print("got a ConnectionResetError")
+            if data != b'':
+                self.receivedLock.acquire()
+                self.received.append(data)
+                self.receivedLock.release()
+            if len(self.toSend) !=0:
+                try:
+                    self.sendMessages(c)
+                except ConnectionResetError:
+                    c.shutdown(socket.SHUT_RDWR)
+                    c.close()
+                    c, addr = waitForConnect()    
+        c.shutdown(socket.SHUT_RDWR)
+        c.close()
+
+
+
+    #INTERNAL 
+    def waitForConnect(self):
+        print("setting up a connection...")
         self.sock.bind((self.host,self.port))
         self.sock.listen(1)
         c, addr = self.sock.accept()
         c.settimeout(TIMEOUT)
         self.sock.close()
-
-        #main loop
-        while self.active:
-            data = b''
-            try:
-                data = c.recv(1024)#TODO shouldn't just grab 1024
-            except socket.timeout:
-                pass
-            except ConnectionResetError: #TODO set flag
-                print("got a ConnectionResetError")
-            if data != b'':
-                self.receivedLock.acquire()
-                self.received.append(data.strip().decode('utf-8'))
-                self.receivedLock.release()
-            if len(self.toSend) !=0:
-                self.sendMessages(c)
-        c.shutdown(socket.SHUT_RDWR)
-        c.close()
-       
-            
+        print("Got one")
+        return (c, addr)
+    
     def shutdown(self):
         self.active = False
 
