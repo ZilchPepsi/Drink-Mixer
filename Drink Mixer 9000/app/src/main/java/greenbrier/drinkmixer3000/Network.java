@@ -22,7 +22,7 @@ import java.util.ArrayList;
  * Created by McGiv on 8/29/2017.
  */
 
-public class Network extends AsyncTask<WorkOrder, Integer , String>/*params, progress, result*/
+public class Network extends AsyncTask<WorkOrder, Integer , Integer>/*params, progress, result*/
 {
 
 
@@ -63,34 +63,24 @@ public class Network extends AsyncTask<WorkOrder, Integer , String>/*params, pro
 
 
     @Override
-    protected String doInBackground(WorkOrder... params)
+    protected Integer doInBackground(WorkOrder... params)
     {
         Log.d("Async","I am working! "+Thread.currentThread().getId());//working thread
         //can call publishProgress() here
 
         switch(params[0].order)
         {
-            case "init":    init(params[0]);
+            case INIT:    init(params[0]);
+                break;
+            case MAKE_MIX : makeMix(params[0]);
+
         }
         return params[0].order;
     }
 
-    /**
-     * creates socket
-     * connects to server
-     * receives and interprets pin, drinks, and mixes
-     *
-     * data:
-     * ArrayList<Mix>
-     * ArrayList<Drink>
-     */
-    private void init(WorkOrder workOrder)
+    private boolean connect()
     {
-        ArrayList<Mix> mixes = (ArrayList<Mix>) workOrder.data.get(0);
-        ArrayList<Drink> drinks = (ArrayList<Drink>) workOrder.data.get(1);
-
-
-        Log.d("Network","starting network connection init");
+        Log.d("Network","starting network connection");
         int attempts = 0;
         while(attempts< 3)
         {
@@ -115,6 +105,54 @@ public class Network extends AsyncTask<WorkOrder, Integer , String>/*params, pro
             {
                 Log.d("Network", "Could not close socket");
             }
+            return false;
+        }
+        return true;
+    }
+
+
+
+    private void makeMix(WorkOrder workOrder)
+    {
+        int drinkNum = ((Integer)workOrder.data.get(0));
+
+        if(!connect())
+        {
+            cancel(true);
+        }
+
+        try
+        {
+            Log.d("Network", "sending makeMix..."+MAKE_MIX);
+            socket.getOutputStream().write(new byte[]{MAKE_MIX, (byte)drinkNum});
+            socket.getOutputStream().flush();
+        }
+        catch(IOException e) {}
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * creates socket
+     * connects to server
+     * receives and interprets pin, drinks, and mixes
+     *
+     * data:
+     * ArrayList<Mix>
+     * ArrayList<Drink>
+     */
+    private void init(WorkOrder workOrder)
+    {
+        ArrayList<Mix> mixes = (ArrayList<Mix>) workOrder.data.get(0);
+        ArrayList<Drink> drinks = (ArrayList<Drink>) workOrder.data.get(1);
+
+
+        if(!connect())
+        {
             cancel(true);
         }
 
@@ -243,14 +281,14 @@ public class Network extends AsyncTask<WorkOrder, Integer , String>/*params, pro
 
 
     @Override
-    protected void onPostExecute(String result)
+    protected void onPostExecute(Integer result)
     {
     }
 
     @Override
-    protected void onCancelled(String result)
+    protected void onCancelled(Integer result)
     {
-    Log.d("Network", "I got cancelled");
+        Log.d("Network", "I got cancelled");
 
     }
 

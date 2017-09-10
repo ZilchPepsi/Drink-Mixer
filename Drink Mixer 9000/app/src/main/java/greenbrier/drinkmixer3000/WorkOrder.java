@@ -8,10 +8,10 @@ import java.util.ArrayList;
 
 public class WorkOrder
 {
-    public final  String order;
+    public final  int order;
     public final  ArrayList<Object> data;
 
-    public WorkOrder(String order, Object... data)
+    public WorkOrder(int order, Object... data)
     {
         this.order = order;
         this.data = new ArrayList<Object>();

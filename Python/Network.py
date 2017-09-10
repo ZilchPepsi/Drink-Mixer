@@ -79,7 +79,7 @@ class Network(threading.Thread):
             timeout = False
             try:
                 timeout = False
-                data = c.recv(1)
+                data = c.recv(32)
             except socket.timeout:
                 timeout = True
             except ConnectionResetError:

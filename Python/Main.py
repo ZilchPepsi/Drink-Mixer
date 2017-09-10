@@ -45,6 +45,8 @@ try:
                 if int(fromNetwork[x][0]) == Network.HELLO:
                     print("Got a hello")
                     network.addMessage(startupString);
+                elif int(fromNetwork[x][0]) == Network.MAKE_MIX:
+                    print("Got a make mix: {}".format(mixes[int(fromNetwork[x][1])].name))
                 else:
                     print("got {}".format(int(fromNetwork[x][0])))
         else:
@@ -54,6 +56,8 @@ except KeyboardInterrupt:
     print("Shutting down")
     network.shutdown()
     io.closeFile()
+
+    
 
 
 

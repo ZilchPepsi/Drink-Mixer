@@ -21,6 +21,9 @@ import java.util.ArrayList;
 
 public class MakeMixViewActivity extends AppCompatActivity
 {
+    private ArrayList<Mix> mixes;
+
+
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -34,13 +37,27 @@ public class MakeMixViewActivity extends AppCompatActivity
 
         DrinksParcelable dp = getIntent().getParcelableExtra(MainActivity.DRINKS_PARCELABLE_NAME);
         CustomAdapter adapter = new CustomAdapter(dp.drinks,dp.mixes);
+        mixes = dp.mixes;
         recyclerView.setAdapter(adapter);
     }
+
+    public int findMix(String name)
+    {
+        for(int x= 0; x<mixes.size(); x++)
+            if(mixes.get(x).getName().equals(name))
+                return x;
+        return -1;
+    }
+
 
     public void clickedDrink(View view)
     {
         String drinkName = ((TextView)((ViewGroup) view).getChildAt(0)).getText().toString();
-        Log.d("Drinks", "clicked drink "+drinkName);
+        int pos = findMix(drinkName);
+        if(pos!=-1)
+            new Network().execute(new WorkOrder(Network.MAKE_MIX, pos));
+        else
+            Log.d("Network", "tried to send drink pos -1");
     }
 
 

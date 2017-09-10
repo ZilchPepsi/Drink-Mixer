@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity
         if(isNetworkConnected())
         {
             net = new Network();
-            net.execute(new WorkOrder("init", mixes, drinks));
+            net.execute(new WorkOrder(Network.INIT, mixes, drinks));
         }
         else
         {
