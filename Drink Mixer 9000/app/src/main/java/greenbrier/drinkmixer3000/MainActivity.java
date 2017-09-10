@@ -1,14 +1,22 @@
 package greenbrier.drinkmixer3000;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Debug;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
+
+import java.util.ArrayList;
 
 /**
  * Created by McGiv on 8/31/2017.
@@ -16,8 +24,12 @@ import android.widget.LinearLayout;
 
 public class MainActivity extends AppCompatActivity
 {
+    public static final String DRINKS_PARCELABLE_NAME = "MIX_N_DRINKS";
+
     private Network net;
     private static int pin;
+    private ArrayList<Drink> drinks;
+    private ArrayList<Mix> mixes;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -25,16 +37,19 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayout.VERTICAL,false));
+        drinks = new ArrayList<Drink>();
+        mixes = new ArrayList<Mix>();
+    }
 
-        CustomAdapter adapter = new CustomAdapter();
-        recyclerView.setAdapter(adapter);
+    @Override
+    public void onStart()
+    {
+        super.onStart();
 
         if(isNetworkConnected())
         {
-            net = new Network(adapter);
-            net.execute("init");
+            net = new Network();
+            net.execute(new WorkOrder("init", mixes, drinks));
         }
         else
         {
@@ -42,17 +57,62 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState)
+    {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putInt("PIN", pin);
+        savedInstanceState.putParcelable(DRINKS_PARCELABLE_NAME, new DrinksParcelable(drinks,mixes));
+    }
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState)
+    {
+        super.onRestoreInstanceState(savedInstanceState);
+        pin = savedInstanceState.getInt("PIN");
+        DrinksParcelable dp = savedInstanceState.getParcelable(DRINKS_PARCELABLE_NAME);
+        drinks = dp.drinks;
+        mixes = dp.mixes;
+    }
+
+
+
+
+    public void gotoMixView(View view)
+    {
+
+        if(net.getStatus() == AsyncTask.Status.RUNNING)
+        {
+            Toast.makeText(getApplicationContext(), "wait for initialization", Toast.LENGTH_LONG);
+
+        }
+        else
+        {
+            Intent intent = new Intent(this, MakeMixViewActivity.class);
+            intent.putExtra(DRINKS_PARCELABLE_NAME, new DrinksParcelable(drinks, mixes));
+            startActivity(intent);
+        }
+    }
+
+    public void gotoSettingsView(View view)
+    {
+        //TODO go to settings view
+    }
+
+    public boolean isNetworkConnected()
+    {
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
+    }
+
     public static void setPin(int pin)
     {
         MainActivity.pin = pin;
     }
-
-
-    private boolean isNetworkConnected()
+    public static int getPin()
     {
-        ConnectivityManager connMgr = (ConnectivityManager)
-        getSystemService(Context.CONNECTIVITY_SERVICE); // 1
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo(); // 2
-        return networkInfo != null && networkInfo.isConnected(); // 3
+        return pin;
     }
+
 }

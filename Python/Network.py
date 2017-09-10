@@ -11,6 +11,7 @@ import array
 # Globals
 #########################
 TIMEOUT = 2
+SERVER_TIMEOUT = 5
 
 #########################
 # BITMASKS
@@ -40,7 +41,6 @@ class Network(threading.Thread):
         self.sendLock = threading.Lock()
         self.receivedLock = threading.Lock()
         
-        self.sock = socket.socket()
         self.host = ''
         self.port = port
         self.active = False
@@ -71,46 +71,68 @@ class Network(threading.Thread):
     def run(self):
         print("starting network thread")
         self.active = True
-
+        
         c, addr = self.waitForConnect()
         #main loop
         while self.active:
             data = b''
+            timeout = False
             try:
+                timeout = False
                 data = c.recv(1)
             except socket.timeout:
-                pass
+                timeout = True
             except ConnectionResetError:
                 c.shutdown(socket.SHUT_RDWR)
                 c.close()
                 c, addr = self.waitForConnect()
+                if c is None:
+                    break
                 print("got a ConnectionResetError")
             if data != b'':
                 self.receivedLock.acquire()
                 self.received.append(data)
                 self.receivedLock.release()
+            elif not timeout:
+                c.shutdown(socket.SHUT_RDWR)
+                c.close()
+                c, addr = self.waitForConnect()
+                if c is None:
+                    break
             if len(self.toSend) !=0:
                 try:
                     self.sendMessages(c)
                 except ConnectionResetError:
                     c.shutdown(socket.SHUT_RDWR)
                     c.close()
-                    c, addr = waitForConnect()    
-        c.shutdown(socket.SHUT_RDWR)
-        c.close()
-
+                    c, addr = waitForConnect()
+                    if c is None:
+                        break
+        if c is not None:
+            c.shutdown(socket.SHUT_RDWR)
+            c.close()
 
 
     #INTERNAL 
     def waitForConnect(self):
         print("setting up a connection...")
+        self.sock = socket.socket()
         self.sock.bind((self.host,self.port))
         self.sock.listen(1)
-        c, addr = self.sock.accept()
-        c.settimeout(TIMEOUT)
-        self.sock.close()
-        print("Got one")
-        return (c, addr)
+        self.sock.settimeout(SERVER_TIMEOUT)
+        while self.active:
+            try:
+                c, addr = self.sock.accept()
+                break
+            except socket.timeout:
+                pass
+        if not self.active:
+            return (None, None)
+        else:
+            c.settimeout(TIMEOUT)
+            self.sock.close()
+            print("Got one")
+            return (c, addr)
     
     def shutdown(self):
         self.active = False

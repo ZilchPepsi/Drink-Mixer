@@ -45,6 +45,8 @@ try:
                 if int(fromNetwork[x][0]) == Network.HELLO:
                     print("Got a hello")
                     network.addMessage(startupString);
+                else:
+                    print("got {}".format(int(fromNetwork[x][0])))
         else:
             time.sleep(1)
         #check machine input

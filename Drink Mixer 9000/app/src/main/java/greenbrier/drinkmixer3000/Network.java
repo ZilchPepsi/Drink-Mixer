@@ -9,21 +9,24 @@ import java.io.InputStream;
 
 import android.os.AsyncTask;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 
 /**
  * Created by McGiv on 8/29/2017.
  */
 
-public class Network extends AsyncTask<String, Integer , String>//params, progress, result
+public class Network extends AsyncTask<WorkOrder, Integer , String>/*params, progress, result*/
 {
 
 
-    public static final String SERVER_IP = "192.168.0.30";
+    public static final String SERVER_IP = "192.168.0.30";//TODO if grabbing static IP then won't work on other networks
     public static final int SERVER_PORT = 1234;
 
    /*
@@ -47,36 +50,46 @@ public class Network extends AsyncTask<String, Integer , String>//params, progre
      */
 
     private Socket socket;
-    private CustomAdapter adapter;
 
-    public Network(CustomAdapter adpt)
+    public Network()
     {
-        adapter = adpt;
     }
 
     @Override
     protected void onPreExecute()
     {
-        Log.d("Async","I am on preExecute! "+Thread.currentThread().getId());
+        Log.d("Async","I am on preExecute! "+Thread.currentThread().getId());//calling thread
     }
 
 
     @Override
-    protected String doInBackground(String... params)
+    protected String doInBackground(WorkOrder... params)
     {
-        Log.d("Async","I am working! "+Thread.currentThread().getId());
+        Log.d("Async","I am working! "+Thread.currentThread().getId());//working thread
         //can call publishProgress() here
 
-
-        switch(params[0])
+        switch(params[0].order)
         {
-            case "init":    init();
+            case "init":    init(params[0]);
         }
-        return params[0];
+        return params[0].order;
     }
 
-    private void init()
+    /**
+     * creates socket
+     * connects to server
+     * receives and interprets pin, drinks, and mixes
+     *
+     * data:
+     * ArrayList<Mix>
+     * ArrayList<Drink>
+     */
+    private void init(WorkOrder workOrder)
     {
+        ArrayList<Mix> mixes = (ArrayList<Mix>) workOrder.data.get(0);
+        ArrayList<Drink> drinks = (ArrayList<Drink>) workOrder.data.get(1);
+
+
         Log.d("Network","starting network connection init");
         int attempts = 0;
         while(attempts< 3)
@@ -170,7 +183,7 @@ public class Network extends AsyncTask<String, Integer , String>//params, progre
         int pos = 3;
         for(; pos< drinkCount*2+3;  pos+=2)
         {
-            adapter.addDrink(new Drink(s[pos], Boolean.parseBoolean(s[pos+1])));
+            drinks.add(new Drink(s[pos], Boolean.parseBoolean(s[pos+1])));
         }
 
         int numMixes = Integer.parseInt(s[pos]);
@@ -183,17 +196,40 @@ public class Network extends AsyncTask<String, Integer , String>//params, progre
             pos++;
             drinkCount = Integer.parseInt(s[pos]);
             pos++;
-            for (int y = 0; y < drinkCount; y++) {
-                Drink d = adapter.getDrink(s[pos]);
-                if (d != null) {
+            for (int y = 0; y < drinkCount; y++)
+            {
+                Drink d = findDrink(drinks, s[pos]);
+                if (d != null)
+                {
                     m.addDrink(d, Integer.parseInt(s[pos + 1]));
                 }
                 pos += 2;
             }
 
-            adapter.addMix(m);
+            mixes.add(m);
+        }
+
+        Log.d("Network", "finished init, shutting down socket");
+        Log.d("ActivityState", "finished init, shutting down socket");
+
+        try
+        {
+            socket.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
         }
     }
+
+    private Drink findDrink(ArrayList<Drink> drinks, String name)
+    {
+        for(int x =0; x< drinks.size(); x++)
+            if(drinks.get(x).name.equals(name))
+                return drinks.get(x);
+        return null;
+    }
+
 
 
 
@@ -209,10 +245,6 @@ public class Network extends AsyncTask<String, Integer , String>//params, progre
     @Override
     protected void onPostExecute(String result)
     {
-        switch(result)
-        {
-            case "init": adapter.notifyDataSetChanged();
-        }
     }
 
     @Override
@@ -221,5 +253,6 @@ public class Network extends AsyncTask<String, Integer , String>//params, progre
     Log.d("Network", "I got cancelled");
 
     }
+
 
 }

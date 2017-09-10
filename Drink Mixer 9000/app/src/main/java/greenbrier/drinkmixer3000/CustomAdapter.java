@@ -1,6 +1,7 @@
 package greenbrier.drinkmixer3000;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,10 +18,10 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomView
     private ArrayList<Mix> mixes;
     private ArrayList<Drink> drinks;
 
-    public CustomAdapter()
+    public CustomAdapter(ArrayList<Drink> d, ArrayList<Mix> m)
     {
-        mixes = new ArrayList<Mix>();
-        drinks = new ArrayList<Drink>();
+        drinks = d;
+        mixes = m;
     }
 
 
