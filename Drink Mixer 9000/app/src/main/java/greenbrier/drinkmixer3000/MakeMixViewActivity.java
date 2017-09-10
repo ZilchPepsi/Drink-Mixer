@@ -8,7 +8,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -33,6 +36,14 @@ public class MakeMixViewActivity extends AppCompatActivity
         CustomAdapter adapter = new CustomAdapter(dp.drinks,dp.mixes);
         recyclerView.setAdapter(adapter);
     }
+
+    public void clickedDrink(View view)
+    {
+        String drinkName = ((TextView)((ViewGroup) view).getChildAt(0)).getText().toString();
+        Log.d("Drinks", "clicked drink "+drinkName);
+    }
+
+
 
     @Override
     public void onStart()
