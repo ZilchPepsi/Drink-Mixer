@@ -42,10 +42,11 @@ try:
         fromNetwork = network.getReceived()
         if len(fromNetwork) > 0 :
             for x in range(len(fromNetwork)):
-                if int(fromNetwork[x][0]) == Network.HELLO:
+                key = int(fromNetwork[x][0])
+                if key == Network.HELLO:
                     print("Got a hello")
                     network.addMessage(startupString);
-                elif int(fromNetwork[x][0]) == Network.MAKE_MIX:
+                elif key == Network.MAKE_MIX:
                     print("Got a make mix: {}".format(mixes[int(fromNetwork[x][1])].name))
                 else:
                     print("got {}".format(int(fromNetwork[x][0])))
