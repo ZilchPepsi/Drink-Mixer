@@ -35,16 +35,12 @@ public class MainActivity extends AppCompatActivity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         drinks = new ArrayList<Drink>();
         mixes = new ArrayList<Mix>();
-    }
 
-    @Override
-    public void onStart()
-    {
-        super.onStart();
 
         if(isNetworkConnected())
         {
@@ -55,12 +51,22 @@ public class MainActivity extends AppCompatActivity
         {
             Log.d("Network", "Network not connected");
         }
+
+    }
+
+    @Override
+    public void onStart()
+    {
+        super.onStart();
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState)
     {
         super.onSaveInstanceState(savedInstanceState);
+
+        Log.d("instances", "save instance called");
+
         savedInstanceState.putInt("PIN", pin);
         savedInstanceState.putParcelable(DRINKS_PARCELABLE_NAME, new DrinksParcelable(drinks,mixes));
     }
@@ -68,6 +74,9 @@ public class MainActivity extends AppCompatActivity
     public void onRestoreInstanceState(Bundle savedInstanceState)
     {
         super.onRestoreInstanceState(savedInstanceState);
+
+        Log.d("instances", "restore instance called");
+
         pin = savedInstanceState.getInt("PIN");
         DrinksParcelable dp = savedInstanceState.getParcelable(DRINKS_PARCELABLE_NAME);
         drinks = dp.drinks;
@@ -82,7 +91,7 @@ public class MainActivity extends AppCompatActivity
 
         if(net.getStatus() == AsyncTask.Status.RUNNING)
         {
-            Toast.makeText(getApplicationContext(), "wait for initialization", Toast.LENGTH_LONG);
+            Toast.makeText(getApplicationContext(), "wait for initialization", Toast.LENGTH_SHORT).show();
 
         }
         else
