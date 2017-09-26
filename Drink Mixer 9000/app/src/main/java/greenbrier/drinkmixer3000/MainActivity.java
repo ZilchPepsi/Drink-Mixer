@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by McGiv on 8/31/2017.
@@ -27,7 +28,11 @@ public class MainActivity extends AppCompatActivity
     public static final String DRINKS_PARCELABLE_NAME = "MIX_N_DRINKS";
 
     private Network net;
+
     private static int pin;
+    private static ReentrantLock pinLock;
+    private static Machine machine;
+
     private ArrayList<Drink> drinks;
     private ArrayList<Mix> mixes;
 
@@ -36,16 +41,21 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
 
+        Log.d("instances", "onCreate Called");
+
         setContentView(R.layout.activity_main);
 
         drinks = new ArrayList<Drink>();
         mixes = new ArrayList<Mix>();
 
+        pinLock = new ReentrantLock();
+
+        machine = new Machine();
 
         if(isNetworkConnected())
         {
             net = new Network();
-            net.execute(new WorkOrder(Network.INIT, mixes, drinks));
+            net.execute(new WorkOrder(Network.INIT, mixes, drinks, getMachineDrinks()));
         }
         else
         {
@@ -58,6 +68,7 @@ public class MainActivity extends AppCompatActivity
     public void onStart()
     {
         super.onStart();
+        Log.d("instances", "onStart Called, pin = " +pin);
     }
 
     @Override
@@ -88,7 +99,6 @@ public class MainActivity extends AppCompatActivity
 
     public void gotoMixView(View view)
     {
-
         if(net.getStatus() == AsyncTask.Status.RUNNING)
         {
             Toast.makeText(getApplicationContext(), "wait for initialization", Toast.LENGTH_SHORT).show();
@@ -104,7 +114,17 @@ public class MainActivity extends AppCompatActivity
 
     public void gotoSettingsView(View view)
     {
-        //TODO go to settings view
+        if(net.getStatus() == AsyncTask.Status.RUNNING)
+        {
+            Toast.makeText(getApplicationContext(), "wait for initialization", Toast.LENGTH_SHORT).show();
+
+        }
+        else
+        {
+            Intent intent = new Intent(this, PinEntryActivity.class);
+            intent.putExtra(DRINKS_PARCELABLE_NAME, new DrinksParcelable(drinks, mixes));
+            startActivity(intent);
+        }
     }
 
     public boolean isNetworkConnected()
@@ -115,13 +135,25 @@ public class MainActivity extends AppCompatActivity
         return networkInfo != null && networkInfo.isConnected();
     }
 
+
+    public static Drink[] getMachineDrinks()
+    {
+        return machine.getDrinks();
+    }
+
     public static void setPin(int pin)
     {
+        pinLock.lock();
         MainActivity.pin = pin;
+        pinLock.unlock();
     }
     public static int getPin()
     {
-        return pin;
+        pinLock.lock();
+        int ret = pin;
+        pinLock.unlock();
+        return ret;
     }
+
 
 }

@@ -1,3 +1,15 @@
+class Machine:
+    
+    def __init__(self, ad=[None,None,None,None,None,None]):
+        self.activeDrinks = ad
+
+    def getDrinks(self):
+        return self.activeDrinks
+    def setDrink(self, drink, pos):
+        self.activeDrinks[pos] = drink
+
+
+'''
 #!/usr/bin/python
 import RPi.GPIO as GPIO
 import time
@@ -62,3 +74,4 @@ except KeyboardInterrupt:
 
   # Reset GPIO settings
   GPIO.cleanup()
+'''

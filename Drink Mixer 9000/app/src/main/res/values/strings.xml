@@ -2,5 +2,11 @@
     <string name="app_name">DrinkMixer3000</string>
     <string name="CreateMix">Create Mix</string>
     <string name="settings">Settings</string>
+    <string name="clear">Clear</string>
+    <string name="setDrinks">Set Drinks</string>
+    <string name="setMixes">Adjust Mixes</string>
+    <string name="changePin">Change Pin</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
 
 </resources>

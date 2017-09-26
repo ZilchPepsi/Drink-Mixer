@@ -22,13 +22,13 @@ class IO:
         pin = int(self.FILE.readline())
 
         drinkCount = int(self.FILE.readline())
-        drinks = [] #TODO because Dranks has list of drinks, don't need to record this list,
-                    #return DRANKS.DRINK.drinkList
+        #drinks = []
         for i in range(drinkCount):
             d = self.FILE.readline().split(':')
-            drinks.append(Dranks.Drink(d[0], IO.convertBool(d[1][:-1])))
-
+            #drinks.append(Dranks.Drink(d[0], IO.convertBool(d[1][:-1])))
+            Dranks.Drink(d[0], IO.convertBool(d[1][:-1])) # don't need to save this because it is saved in Dranks.Drink.drinkList
         mixCount = int(self.FILE.readline())
+        
         mixes = []
         for i in range(mixCount):
             m = self.FILE.readline().split(':')
@@ -39,9 +39,21 @@ class IO:
                 else:
                     print("no such drink {}".format(m[j]))
             mixes.append(mix)
-        return (pin,drinks,mixes)
+            
+        activeDrinks = []
+        for i in range(6):
+            d = self.FILE.readline()
+            if d == '\n' or d == '':
+                activeDrinks.append(None)
+            elif Dranks.Drink.hasDrink(d):
+                activeDrinks.append(Dranks.Drink.getDrink(d))
+            else:
+                print("No such drink {}, not adding to active drinks".format(d))
+            
+        
+        return (pin, Dranks.Drink.drinkList, mixes, activeDrinks)
 
-    def writeFile(self, pin, drinks, mixes):
+    def writeFile(self, pin, drinks, mixes,activeDrinks):
         self.FILE.seek(0)
         self.FILE.truncate()
         self.FILE.write(str(pin)+'\n')
@@ -57,3 +69,13 @@ class IO:
                 if i != len(m.drinks)-1:
                     self.FILE.write(':')
             self.FILE.write('\n')
+        for ad in activeDrinks:
+            if ad is not None:
+                self.FILE.write(ad.name+'\n')
+            else:
+                self.FILE.write('\n')
+
+
+
+
+        

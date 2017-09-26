@@ -36,7 +36,7 @@ public class MakeMixViewActivity extends AppCompatActivity
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayout.VERTICAL,false));
 
         DrinksParcelable dp = getIntent().getParcelableExtra(MainActivity.DRINKS_PARCELABLE_NAME);
-        CustomAdapter adapter = new CustomAdapter(dp.drinks,dp.mixes);
+        MakeMixAdapter adapter = new MakeMixAdapter(dp.drinks,dp.mixes);
         mixes = dp.mixes;
         recyclerView.setAdapter(adapter);
     }

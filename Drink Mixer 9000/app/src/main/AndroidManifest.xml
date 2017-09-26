@@ -29,7 +29,8 @@
             android:screenOrientation="locked"
             android:theme="@style/AppTheme" />
         <activity android:name=".SettingsActivity" />
-        <activity android:name=".PinEntryActivity"></activity>
+        <activity android:name=".PinEntryActivity" />
+        <activity android:name=".SetDrinksActivity"></activity>
     </application>
 
 </manifest>

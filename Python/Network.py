@@ -21,11 +21,16 @@ ADD_MIX = 1
 MODIFY_MIX = 2
 DELETE_MIX = 3
 
+GET_DRINKS = 11
 ADD_DRINK = 4
 DELETE_DRINK = 5
 
+#machine info
+GET_ACTIVE_DRINKS = 12
+SET_ACTIVE_DRINKS = 13
+
 INIT = 6
-INIT_CONFIRM = 8
+INIT_CONFIRM = 8 # not used
 
 HELLO = 9
 GOODBYE = 10
@@ -60,6 +65,7 @@ class Network(threading.Thread):
         length = len(self.toSend)
         for _ in range(length):
             try:
+                print("Sending {}".format(self.toSend[0]))
                 c.send(self.toSend.pop(0).encode('utf-8'))
             except ConnectionResetError:
                 self.sendLock.release()

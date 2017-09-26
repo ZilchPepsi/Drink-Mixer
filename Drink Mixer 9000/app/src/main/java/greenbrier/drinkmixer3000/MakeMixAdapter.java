@@ -13,12 +13,12 @@ import java.util.ArrayList;
  * Created by McGiv on 8/31/2017.
  */
 
-public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder>
+public class MakeMixAdapter extends RecyclerView.Adapter<MakeMixAdapter.CustomViewHolder>
 {
     private ArrayList<Mix> mixes;
     private ArrayList<Drink> drinks;
 
-    public CustomAdapter(ArrayList<Drink> d, ArrayList<Mix> m)
+    public MakeMixAdapter(ArrayList<Drink> d, ArrayList<Mix> m)
     {
         drinks = d;
         mixes = m;
@@ -61,8 +61,8 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomView
     @Override
     public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_layout, parent, false);
-        return new CustomAdapter.CustomViewHolder(v);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.mix_layout, parent, false);
+        return new MakeMixAdapter.CustomViewHolder(v);
     }
 
 
@@ -88,8 +88,8 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomView
 
         public void bindItems(Mix m)
         {
-            TextView textViewDrink = (TextView) itemView.findViewById(R.id.textViewDrink);
-            TextView textViewRecipe = (TextView) itemView.findViewById(R.id.textViewRecipe);
+            TextView textViewDrink = itemView.findViewById(R.id.textViewDrink);
+            TextView textViewRecipe = itemView.findViewById(R.id.textViewRecipe);
             textViewDrink.setText(m.getName());
 
             for(Drink d :m.getDrinks().keySet())

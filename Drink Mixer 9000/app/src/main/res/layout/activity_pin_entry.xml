@@ -1,61 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<GridLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_weight="3"
-    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:columnCount="3"
+    android:orientation="horizontal"
     tools:context="greenbrier.drinkmixer3000.PinEntryActivity">
-
-    <TextView
-        android:id="@+id/PinTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"/>
-
-    <GridLayout
-        android:id="@+id/PinGridView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="2"
-        android:layout_gravity="center"
-        android:columnCount="3"
-        android:rowCount="3"
-        >
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-
-    </GridLayout>
-
-
-
-
-</LinearLayout>
+    <TextView android:layout_gravity="fill"
+        android:id="@+id/pin_input"
+        android:layout_columnSpan="3"/>
+    <Button android:text="1"
+        android:id="@+id/pin_1"
+        android:onClick="numPressed"/>
+    <Button android:text="2"
+        android:id="@+id/pin_2"
+        android:onClick="numPressed"/>
+    <Button android:text="3"
+        android:id="@+id/pin_3"
+        android:onClick="numPressed"/>
+    <Button android:text="4"
+        android:id="@+id/pin_4"
+        android:onClick="numPressed"/>
+    <Button android:text="5"
+        android:id="@+id/pin_5"
+        android:onClick="numPressed"/>
+    <Button android:text="6"
+        android:id="@+id/pin_6"
+        android:onClick="numPressed"/>
+    <Button android:text="7"
+        android:id="@+id/pin_7"
+        android:onClick="numPressed"/>
+    <Button android:text="8"
+        android:id="@+id/pin_8"
+        android:onClick="numPressed"/>
+    <Button android:text="9"
+        android:id="@+id/pin_9"
+        android:onClick="numPressed"/>
+    <Button android:text="0"
+        android:id="@+id/pin_0"
+        android:layout_column="1"/>
+    <Button android:text="@string/clear"
+        android:id="@+id/pin_clear"
+        android:onClick="numPressed"/>
+</GridLayout>

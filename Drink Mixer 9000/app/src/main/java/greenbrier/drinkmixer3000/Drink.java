@@ -66,6 +66,11 @@ public class Drink implements Comparable<Drink>, Parcelable
         return name.compareTo(d.name);
     }
 
+    public String toString()
+    {
+        return name+":"+alcoholic;
+    }
+
 
 
 }
