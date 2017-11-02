@@ -1,13 +1,60 @@
+#!/usr/bin/python
+import RPi.GPIO as GPIO
+import time
+
+'''
+BCM
+pin 2 - step
+pin 3 - direction
+pin 4 - enable
+pin 6 - ground
+pin 17 - MS1
+pin 27 - MS2
+
+process
+ENABLE - set LOW
+MS1 & 2 - set LOW (for full step)
+DIRECTION - set LOW
+step - set Low
+
+control
+step - low -> high = step
+
+
+'''
+
+
 class Machine:
     
     def __init__(self, ad=[None,None,None,None,None,None]):
         self.activeDrinks = ad
+        self.pinList = [2,3,4,17,27]
+        
 
     def getDrinks(self):
         return self.activeDrinks
     def setDrink(self, drink, pos):
         self.activeDrinks[pos] = drink
 
+
+    def step(self):
+        GPIO.output(self.pinList[0], GPIO.HIGH)
+        GPIO.output(self.pinList[0], GPIO.LOW)
+
+    def setup(self):
+        GPIO.setmode(GPIO.BCM)
+        for i in self.pinList:
+            GPIO.setup(i, GPIO.OUT, initial = GPIO.LOW)
+
+    def cleanup(self):
+          GPIO.cleanup()
+
+mac = Machine()
+mac.setup()
+for x in range(0,400):
+    mac.step()
+    print("step {}".format(x))
+mac.cleanup()
 
 '''
 #!/usr/bin/python
