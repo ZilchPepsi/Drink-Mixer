@@ -2,6 +2,7 @@
 import RPi.GPIO as GPIO
 import time
 import datetime
+import math
 
 '''
 BiggerDriver
@@ -48,9 +49,9 @@ class Machine_BiggerDriver:
 
 
     def step(self):
-        time.sleep(0.0003)
+        time.sleep(0.0004)
         GPIO.output(self.pinList[2], GPIO.HIGH)
-        time.sleep(0.0003)
+        time.sleep(0.0004)
         GPIO.output(self.pinList[2], GPIO.LOW)
 
     def step_control(self, count, maxSpeed, startSpeed = .001):
@@ -58,51 +59,27 @@ class Machine_BiggerDriver:
         #maxSpeed - min wait time
         #startSpeed - starting wait time
         curSpeed = startSpeed
-        inc = (maxSpeed - curSpeed)/(count/2)
+        inc = (maxSpeed-startSpeed)/(count/2)
+        curStep = 1
         
+        print("inc {}".format(inc))
         for i in range(0, count):
             time.sleep(curSpeed)
             GPIO.output(self.pinList[2], GPIO.HIGH)
             time.sleep(curSpeed)
             GPIO.output(self.pinList[2], GPIO.LOW)
             if curSpeed > maxSpeed:
-                curSpeed +=inc
+                curSpeed += math.exp(curStep*inc)*inc*10
+                curStep+=1
+                if curSpeed < maxSpeed:
+                    curSpeed = maxSpeed
 
     def setup(self):
         GPIO.setmode(GPIO.BCM)
         for i in self.pinList:
             GPIO.setup(i, GPIO.OUT, initial = GPIO.LOW)
-        #GPIO.output(self.pinList[1], GPIO.HIGH)
+        #GPIO.output(self.pinList[1], GPIO.HIGH) #changes direction
         #GPIO.output(self.pinList[0], GPIO.HIGH) #set enable high
-
-    def cleanup(self):
-          GPIO.cleanup()
-
-
-class Machine_EasyDriver:
-    
-    def __init__(self, ad=[None,None,None,None,None,None]):
-        self.activeDrinks = ad
-        self.pinList = [2,3,4,17,27]
-        
-
-    def getDrinks(self):
-        return self.activeDrinks
-    
-    def setDrink(self, drink, pos):
-        self.activeDrinks[pos] = drink
-
-
-    def step(self):
-        time.sleep(0.001)
-        GPIO.output(self.pinList[0], GPIO.HIGH)
-        time.sleep(0.001)
-        GPIO.output(self.pinList[0], GPIO.LOW)
-
-    def setup(self):
-        GPIO.setmode(GPIO.BCM)
-        for i in self.pinList:
-            GPIO.setup(i, GPIO.OUT, initial = GPIO.LOW)
 
     def cleanup(self):
           GPIO.cleanup()
@@ -111,9 +88,9 @@ class Machine_EasyDriver:
 mac = Machine_BiggerDriver()
 mac.setup()
 curTime = datetime.datetime.now()
-#mac.step_control(4000, .0002)
-for i in range(0,2000):
-    mac.step()
+mac.step_control(30000, .0004)
+#for i in range(0,2000):
+    #mac.step()
 totalTime = datetime.datetime.now() - curTime
 print("total {}".format(totalTime))
 mac.cleanup()
