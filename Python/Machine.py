@@ -77,17 +77,17 @@ class Machine_BiggerDriver:
                 if curSpeed < maxSpeed:
                     curSpeed = maxSpeed
 
-    def openDrink(self, i)
-        GPIO.output(self.pinList[2+i], GPIO.HIGH)
-
-    def closeDrink(self, i)
-        GPIO.output(self.pinList[2+i],  GPIO.LOW)
-        
+    def openDrink(self, i):
+        GPIO.output(self.pinList[2+i], GPIO.LOW)
+        time.sleep(2)
+        GPIO.output(self.pinList[2+i],  GPIO.HIGH)       
 
     def setup(self):
         GPIO.setmode(GPIO.BCM)
         for i in self.pinList:
             GPIO.setup(i, GPIO.OUT, initial = GPIO.LOW)
+        GPIO.output(self.pinList[3], GPIO.HIGH)
+        GPIO.output(self.pinList[4], GPIO.HIGH)#set drink 1 high
         #GPIO.output(self.pinList[1], GPIO.HIGH) #changes direction
         #GPIO.output(self.pinList[0], GPIO.HIGH) #set enable high
 
@@ -98,9 +98,11 @@ class Machine_BiggerDriver:
 mac = Machine_BiggerDriver()
 mac.setup()
 curTime = datetime.datetime.now()
-mac.step_control(200, .0003)
+#mac.step_control(200, .0003)
 #for i in range(0,2000):
     #mac.step()
+mac.openDrink(1)
+mac.openDrink(2)
 totalTime = datetime.datetime.now() - curTime
 print("total {}".format(totalTime))
 mac.cleanup()
