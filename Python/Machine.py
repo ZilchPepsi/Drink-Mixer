@@ -38,7 +38,10 @@ step - low -> high = step
 class Machine_BiggerDriver:
     def __init__(self, ad=[None,None,None,None,None,None]):
         self.activeDrinks = ad
-        self.pinList = [2,3,4]
+        #234 - stepper
+        #17, 18, 22, 23, 24, 27 - relay
+        self.pinList = [2,3,4, 17, 18, 22, 23, 24, 27]
+        
         
 
     def getDrinks(self):
@@ -74,6 +77,13 @@ class Machine_BiggerDriver:
                 if curSpeed < maxSpeed:
                     curSpeed = maxSpeed
 
+    def openDrink(self, i)
+        GPIO.output(self.pinList[2+i], GPIO.HIGH)
+
+    def closeDrink(self, i)
+        GPIO.output(self.pinList[2+i],  GPIO.LOW)
+        
+
     def setup(self):
         GPIO.setmode(GPIO.BCM)
         for i in self.pinList:
@@ -88,7 +98,7 @@ class Machine_BiggerDriver:
 mac = Machine_BiggerDriver()
 mac.setup()
 curTime = datetime.datetime.now()
-mac.step_control(30000, .0004)
+mac.step_control(200, .0003)
 #for i in range(0,2000):
     #mac.step()
 totalTime = datetime.datetime.now() - curTime
