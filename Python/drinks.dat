@@ -1,21 +1,44 @@
 1234
-3
-Rum:True
+14
+Dark Rum:True
 Vodka:True
+Whiskey:True
+Sweet Red Vermouth:True
+Dry Vermouth:True
+Ginger Beer:True
+White Rum:True
+Triple Sec:True
+Tequila:True
+Gin:True
 Sprite:False
+Coke:False
+Lemon Juice:False
+Tonic:False
 9
-Bloody Mary:2:Rum:1:Sprite:3
-Nope:1:Vodka:10
-Nope:1:Vodka:10
-Nope:1:Vodka:10
-Nope:1:Vodka:10
-Nope:1:Vodka:10
-Nope:1:Vodka:10
-Nope:1:Vodka:10
-Nope:1:Vodka:10
+Rum & Coke:2:Dark Rum:2:Coke:5
+Vodka & Sprite:2:Vodka:2:Sprite:5
+Gin & Tonic:2:Gin:3:Tonic:5
+Vodka & Tonic:2:Vodka:2:Tonic:5
+Manhattan:2:Whiskey:3:Sweet Red Vermouth:1
+Dark 'N' Stormy:2:Ginger Beer:4:Dark Rum:2
+Mojito:3:White Rum:2:Lemon Juice:1:Tonic:3
+Martini:2:Vodka:3:Dry Vermouth:1
+Margarita:3:Tequila:3:Lemon Juice:2:Triple Sec:2
+Tequila
+White Rum
+Dark Rum
+Triple Sec
+Vodka
+Whiskey
+Sprite
+Coke
+Lemon Juice
+Tonic
 
 
-
-
-
-
+0
+0
+0
+0
+0
+0

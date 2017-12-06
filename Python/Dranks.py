@@ -6,12 +6,15 @@ class Drink:
         self.alcoholic = alcoholic
         Drink.drinkList.append(self)
 
+    #class function
     #O(N)
     def hasDrink(name):
         for i in range(len(Drink.drinkList)):
             if Drink.drinkList[i].name == name:
                 return True
         return False
+
+    #class function
     #O(N)
     def getDrink(name):
         for i in range(len(Drink.drinkList)):

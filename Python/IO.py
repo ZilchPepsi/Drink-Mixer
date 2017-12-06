@@ -25,8 +25,7 @@ class IO:
         #drinks = []
         for i in range(drinkCount):
             d = self.FILE.readline().split(':')
-            #drinks.append(Dranks.Drink(d[0], IO.convertBool(d[1][:-1])))
-            Dranks.Drink(d[0], IO.convertBool(d[1][:-1])) # don't need to save this because it is saved in Dranks.Drink.drinkList
+            Dranks.Drink(d[0], IO.convertBool(d[1][:-1]))
         mixCount = int(self.FILE.readline())
         
         mixes = []
@@ -45,15 +44,26 @@ class IO:
             d = self.FILE.readline()
             if d == '\n' or d == '':
                 activeDrinks.append(None)
-            elif Dranks.Drink.hasDrink(d):
-                activeDrinks.append(Dranks.Drink.getDrink(d))
+            elif Dranks.Drink.hasDrink(d[:-1]):
+                activeDrinks.append(Dranks.Drink.getDrink(d[:-1]))
             else:
-                print("No such drink {}, not adding to active drinks".format(d))
+                print("No such drink {}, not adding to active drinks".format(d[:-1]))
+        activeMixers = []
+        for i in range(6):
+            d = self.FILE.readline()
+            if d== '\n' or d=='':
+                activeMixers.append(None)
+            elif Dranks.Drink.hasDrink(d[:-1]):
+                activeMixers.append(Dranks.Drink.getDrink(d[:-1]))
+            else:
+                print("No such drink {}, not adding to active mixers".format(d[:-1]))
+        drinkPositions = []
+        for i in range(6):
+            drinkPositions.append(int(self.FILE.readline()))
             
-        
-        return (pin, Dranks.Drink.drinkList, mixes, activeDrinks)
+        return (pin, Dranks.Drink.drinkList, mixes, activeDrinks,activeMixers, drinkPositions)
 
-    def writeFile(self, pin, drinks, mixes,activeDrinks):
+    def writeFile(self, pin, drinks, mixes,activeDrinks,activeMixers, drinkPositions):
         self.FILE.seek(0)
         self.FILE.truncate()
         self.FILE.write(str(pin)+'\n')
@@ -74,6 +84,13 @@ class IO:
                 self.FILE.write(ad.name+'\n')
             else:
                 self.FILE.write('\n')
+        for am in activeMixers:
+            if am is not None:
+                self.FILE.write(am.name+'\n')
+            else:
+                self.FILE.write('\n')
+        for dp in drinkPositions:
+            self.FILE.write(str(dp)+'\n')
 
 
 

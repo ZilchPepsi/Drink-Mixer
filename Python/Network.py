@@ -5,7 +5,6 @@
 
 import socket
 import threading
-import array
 
 #########################
 # Globals

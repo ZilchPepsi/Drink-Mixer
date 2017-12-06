@@ -11,110 +11,147 @@ pin 2 - enable
 pin 3 - direction
 pin 4 - pulse
 
+low->high = step
+
+motor colors : driver wires
+black : purple
+green : brown
+red : red
+blue : black
 '''
 
+class Machine:
 
-'''
-easyDriver
-BCM
-pin 2 - step
-pin 3 - direction
-pin 4 - enable
-pin 6 - ground
-pin 17 - MS1
-pin 27 - MS2
+    drinkPositions = []
+    startPosition = 0
+    currentPostion = 0
+    stepperPins = [2,3,4]
+    relayDrinkPins = [17, 18, 22, 23, 24, 27]
+    relayMixerPins = [9,10,11,25]
 
-process
-ENABLE - set LOW
-MS1 & 2 - set LOW (for full step)
-DIRECTION - set LOW
-step - set Low
+    drinkWaitTime = 5 #TODO - needs testing
+    mixerWaitTime = 2 #TODO - needs testing
 
-control
-step - low -> high = step
-'''
+    maxSpeed = .00035 #max speed of stepper motor
+    #enable low is right, high is left
 
-
-class Machine_BiggerDriver:
-    def __init__(self, ad=[None,None,None,None,None,None]):
-        self.activeDrinks = ad
-        #234 - stepper
-        #17, 18, 22, 23, 24, 27 - relay
-        self.pinList = [2,3,4, 17, 18, 22, 23, 24, 27]
-        
-        
-
-    def getDrinks(self):
-        return self.activeDrinks
     
-    def setDrink(self, drink, pos):
-        self.activeDrinks[pos] = drink
+    def __init__(self, dp=[0,0,0,0,0,0]):
+        startPosition = 0
+        currentPosition = 0
+        drinkPositions = dp
+        setup()
 
 
-    def step(self):
-        time.sleep(0.0004)
-        GPIO.output(self.pinList[2], GPIO.HIGH)
-        time.sleep(0.0004)
-        GPIO.output(self.pinList[2], GPIO.LOW)
+    def getDrinkPositions(self):
+        return (startPosition, drinkPositions)
 
-    def step_control(self, count, maxSpeed, startSpeed = .001):
+    def setDrinkPosition(self, drinkNum, pos):
+        drinkPosition[drinkNum] = pos
+
+
+    def openAlc(self, drinkNum):
+        GPIO.output(relayDrinkPins[drinkNum], GPIO.LOW)
+        time.sleep(drinkWaitTime)
+        GPIO.output(relayDrinkPins[drinkNum],  GPIO.HIGH)
+        time.sleep(1)
+
+    def openMixer(self, drinkNum):
+        GPIO.output(relayMixerPins[drinkNum], GPIO.LOW)
+        time.sleep(mixerWaitTime)
+        GPIO.output(relayMixerPins[drinkNum],  GPIO.HIGH)
+        time.sleep(1)
+
+    #rotates stepper motor 'rotations' times
+    def moveTrayR(self, rotations):
+        _step_control(rotations, maxSpeed)
+
+    #moves tray to position 'position'
+    def moveTrayP(self, position):
+
+        if position < 0 or position > len(drinkPositions): # this position is out of range
+            print("tried to move to position {}, which does not exist".format(position))
+            return
+        
+        numRot = 0  
+        if position == 0:
+            numRot = -currentPosition
+        else:    
+            numRot = drinkPositions[position-1]- currentPosition
+        _step_control(numRot, maxSpeed)
+        
+    def resetPosition(self):
+        _step_control(-currentPosition, maxSpeed)
+
+
+    def _step_control(self, count, maxS, startSpeed = .001):
         #count - number of rotations
         #maxSpeed - min wait time
         #startSpeed - starting wait time
         curSpeed = startSpeed
-        inc = (maxSpeed-startSpeed)/(count/2)
-        curStep = 1
+        inc = (maxS-startSpeed)/(count/2)
+
+        if count ==0:
+            return
+        elif count <0 :
+            GPIO.output(stepperPins[1], GPIO.HIGH)
+            count = count*-1
+        else:
+            GPIO.output(stepperPins[1], GPIO.LOW)
         
-        print("inc {}".format(inc))
         for i in range(0, count):
             time.sleep(curSpeed)
-            GPIO.output(self.pinList[2], GPIO.HIGH)
+            GPIO.output(stepperPins[2], GPIO.HIGH)
             time.sleep(curSpeed)
-            GPIO.output(self.pinList[2], GPIO.LOW)
-            if curSpeed > maxSpeed:
+            GPIO.output(stepperPins[2], GPIO.LOW)
+            if curSpeed > maxS:
                 curSpeed += math.exp(curStep*inc)*inc*10
-                curStep+=1
-                if curSpeed < maxSpeed:
-                    curSpeed = maxSpeed
-
-    def openDrink(self, i):
-        GPIO.output(self.pinList[2+i], GPIO.LOW)
-        time.sleep(2)
-        GPIO.output(self.pinList[2+i],  GPIO.HIGH)       
+                if curSpeed < maxS:
+                    curSpeed = maxS
 
     def setup(self):
         GPIO.setmode(GPIO.BCM)
-        for i in self.pinList:
+        for i in stepperPins:
             GPIO.setup(i, GPIO.OUT, initial = GPIO.LOW)
-        GPIO.output(self.pinList[3], GPIO.HIGH)
-        GPIO.output(self.pinList[4], GPIO.HIGH)#set drink 1 high
-        #GPIO.output(self.pinList[1], GPIO.HIGH) #changes direction
-        #GPIO.output(self.pinList[0], GPIO.HIGH) #set enable high
+        for i in relayDrinkPins:
+            GPIO.setup(i, GPIO.OUT, initial = GPIO.HIGH)
+        for i in relayMixerPins:
+            GPIO.setup(i,GPIO.OUT, initial = GPIO.HIGH)
 
+    #main calls me when we're done
     def cleanup(self):
           GPIO.cleanup()
 
+#enable, direction, pulse
+stepperPins = [2,3,4]
+enabled = True
 
-mac = Machine_BiggerDriver()
-mac.setup()
-curTime = datetime.datetime.now()
-#mac.step_control(200, .0003)
-#for i in range(0,2000):
-    #mac.step()
-mac.openDrink(1)
-mac.openDrink(2)
-totalTime = datetime.datetime.now() - curTime
-print("total {}".format(totalTime))
-mac.cleanup()
+def moveLeft_debug(maxS, startSpeed = .001):
+    curSpeed = startSpeed
+    inc = (maxS-startSpeed)/5
+    GPIO.output(stepperPins[1], GPIO.HIGH)
 
+    while enabled:
+        time.sleep(curSpeed)
+        GPIO.output(stepperPins[2], GPIO.HIGH)
+        time.sleep(curSpeed)
+        GPIO.output(stepperPins[2], GPIO.LOW)
+        if curSpeed > maxS:
+            curSpeed += math.exp(curStep*inc)*inc*10
+            if curSpeed < maxS:
+                curSpeed = maxS
 
-'''
-mac = Machine_EasyDriver()
-mac.setup()
-curTime = datetime.datetime.now()
-for x in range(0,2000):
-    mac.step()
-totalTime = datetime.datetime.now() - curTime
-print("total {}".format(totalTime))
-mac.cleanup()
-'''
+def moveRight_debug(maxS, startSpeed = .001):
+    curSpeed = startSpeed
+    inc = (maxS-startSpeed)/5
+    GPIO.output(stepperPins[1], GPIO.LOW)
+
+    while enabled:
+        time.sleep(curSpeed)
+        GPIO.output(stepperPins[2], GPIO.HIGH)
+        time.sleep(curSpeed)
+        GPIO.output(stepperPins[2], GPIO.LOW)
+        if curSpeed > maxS:
+            curSpeed += math.exp(curStep*inc)*inc*10
+            if curSpeed < maxS:
+                curSpeed = maxS
