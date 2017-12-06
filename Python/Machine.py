@@ -32,90 +32,98 @@ class Machine:
     drinkWaitTime = 5 #TODO - needs testing
     mixerWaitTime = 2 #TODO - needs testing
 
-    maxSpeed = .00035 #max speed of stepper motor
+    maxSpeed = .0004 #max speed of stepper motor
     #enable low is right, high is left
 
     
     def __init__(self, dp=[0,0,0,0,0,0]):
-        startPosition = 0
-        currentPosition = 0
-        drinkPositions = dp
-        setup()
+        self.startPosition = 0
+        self.currentPosition = 0
+        self.drinkPositions = dp
+        self.setup()
 
 
     def getDrinkPositions(self):
         return (startPosition, drinkPositions)
 
+    #drinks are origin 1
     def setDrinkPosition(self, drinkNum, pos):
-        drinkPosition[drinkNum] = pos
+        self.drinkPositions[drinkNum-1] = pos
 
 
+    #origin 1
     def openAlc(self, drinkNum):
-        GPIO.output(relayDrinkPins[drinkNum], GPIO.LOW)
-        time.sleep(drinkWaitTime)
-        GPIO.output(relayDrinkPins[drinkNum],  GPIO.HIGH)
+        GPIO.output(self.relayDrinkPins[drinkNum-1], GPIO.LOW)
+        time.sleep(self.drinkWaitTime)
+        GPIO.output(self.relayDrinkPins[drinkNum-1],  GPIO.HIGH)
         time.sleep(1)
-
+    #origin 1
     def openMixer(self, drinkNum):
-        GPIO.output(relayMixerPins[drinkNum], GPIO.LOW)
+        GPIO.output(relayMixerPins[drinkNum-1], GPIO.LOW)
         time.sleep(mixerWaitTime)
-        GPIO.output(relayMixerPins[drinkNum],  GPIO.HIGH)
+        GPIO.output(relayMixerPins[drinkNum-1],  GPIO.HIGH)
         time.sleep(1)
 
     #rotates stepper motor 'rotations' times
     def moveTrayR(self, rotations):
-        _step_control(rotations, maxSpeed)
+        self.currentPosition +=rotations
+        self._step_control(rotations, self.maxSpeed)
 
-    #moves tray to position 'position'
+    #moves tray to position 'position', drinks are origin 1
+    #moving to pos 0 means start
     def moveTrayP(self, position):
-
-        if position < 0 or position > len(drinkPositions): # this position is out of range
+        if position < 0 or position > len(self.drinkPositions): # this position is out of range
             print("tried to move to position {}, which does not exist".format(position))
             return
         
         numRot = 0  
         if position == 0:
-            numRot = -currentPosition
+            numRot = -self.currentPosition
+            self.currentPosition = 0
+            
         else:    
-            numRot = drinkPositions[position-1]- currentPosition
-        _step_control(numRot, maxSpeed)
+            numRot = self.drinkPositions[position-1]- self.currentPosition
+            self.currentPosition += numRot
+        self._step_control(numRot, self.maxSpeed)
         
     def resetPosition(self):
-        _step_control(-currentPosition, maxSpeed)
+        self._step_control(-self.currentPosition, self.maxSpeed)
 
 
-    def _step_control(self, count, maxS, startSpeed = .001):
+    def _step_control(self, default_count, maxS, startSpeed = .001):
         #count - number of rotations
         #maxSpeed - min wait time
         #startSpeed - starting wait time
+        
+        count = abs(default_count)
         curSpeed = startSpeed
         inc = (maxS-startSpeed)/(count/2)
 
-        if count ==0:
+        if default_count ==0:
             return
-        elif count <0 :
+        elif default_count <0 :
             GPIO.output(stepperPins[1], GPIO.HIGH)
-            count = count*-1
         else:
             GPIO.output(stepperPins[1], GPIO.LOW)
-        
+
+        print("count {}".format(count))
         for i in range(0, count):
             time.sleep(curSpeed)
             GPIO.output(stepperPins[2], GPIO.HIGH)
             time.sleep(curSpeed)
             GPIO.output(stepperPins[2], GPIO.LOW)
             if curSpeed > maxS:
-                curSpeed += math.exp(curStep*inc)*inc*10
+                curSpeed += math.exp(curSpeed*inc)*inc*10
                 if curSpeed < maxS:
                     curSpeed = maxS
 
     def setup(self):
         GPIO.setmode(GPIO.BCM)
-        for i in stepperPins:
+        for i in self.stepperPins:
             GPIO.setup(i, GPIO.OUT, initial = GPIO.LOW)
-        for i in relayDrinkPins:
+        for i in self.relayDrinkPins:
             GPIO.setup(i, GPIO.OUT, initial = GPIO.HIGH)
-        for i in relayMixerPins:
+        for i in self.relayMixerPins:
             GPIO.setup(i,GPIO.OUT, initial = GPIO.HIGH)
 
     #main calls me when we're done
@@ -137,7 +145,7 @@ def moveLeft_debug(maxS, startSpeed = .001):
         time.sleep(curSpeed)
         GPIO.output(stepperPins[2], GPIO.LOW)
         if curSpeed > maxS:
-            curSpeed += math.exp(curStep*inc)*inc*10
+            curSpeed += math.exp(curSpeed*inc)*inc*10
             if curSpeed < maxS:
                 curSpeed = maxS
 
@@ -152,6 +160,23 @@ def moveRight_debug(maxS, startSpeed = .001):
         time.sleep(curSpeed)
         GPIO.output(stepperPins[2], GPIO.LOW)
         if curSpeed > maxS:
-            curSpeed += math.exp(curStep*inc)*inc*10
+            curSpeed += math.exp(curSpeed*inc)*inc*10
             if curSpeed < maxS:
                 curSpeed = maxS
+
+
+mac = Machine()
+#def setDrinkPosition(self, drinkNum, pos):
+mac.setDrinkPosition(1, 6200)
+mac.setDrinkPosition(2, 13200)
+mac.setDrinkPosition(3, 20400)
+mac.setDrinkPosition(4, 27700)
+mac.setDrinkPosition(5, 34700)
+mac.setDrinkPosition(6, 40500)
+mac.moveTrayP(2)
+#mac.moveTrayR(50)
+mac.openAlc(1)
+time.sleep(1)
+mac.moveTrayP(0)
+mac.cleanup()
+
