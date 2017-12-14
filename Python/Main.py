@@ -1,7 +1,7 @@
 import IO
 import Network
 import time
-#import Machine
+import Machine
 
 
 def sortMix(mix):
@@ -13,10 +13,12 @@ def sortMix(mix):
             sodas.append(d)
             drinksList.remove(d)
     while len(drinksList) >0:
+        curDrink = None
         try:
             curMax = 0
             drinkTuple = drinksList[0]
             for i in drinksList:
+                curDrink = i[0]
                 index = activeDrinks.index(i[0])
                 if index > curMax:
                     curMax = index
@@ -24,7 +26,7 @@ def sortMix(mix):
             retList.append(drinkTuple)
             drinksList.remove(drinkTuple)
         except ValueError:#the drink was not in the list
-            print("got value error")
+            print("{} is not in the machine right now".format(curDrink.name))
             return []
     for d in sodas:
         retList.append(d)
@@ -44,7 +46,7 @@ pin,drinks,mixes, activeDrinks, activeMixers, drinkPositions = io.readFile()
 
 
 #initialize machine
-#machine = Machine.Machine(dp = drinkPositions)
+machine = Machine.Machine(dp = drinkPositions)
 
 #start network
 network.start()
@@ -91,19 +93,19 @@ try:
                         print("working on drink {}".format(d[0].name))
                         if d[0].alcoholic:
                             drinkPos = activeDrinks.index(d[0])
-                            print("moving to position {}, pouring {} shots".format(drinkPos, d[1]))
-                            #machine.moveTrayP(drinkPos)
+                            print("moving to position {}, pouring {} shots".format(drinkPos+1, d[1]))
+                            machine.moveTrayP(drinkPos+1)
                             for shot in range(d[1]):
                                 print("pouring shot {}".format(shot))
-                                 #machine.openAlc(drinkPos)
+                                machine.openAlc(drinkPos+1)
                             time.sleep(1)
                         else:
                             drinkPos = activeMixers.index(d[0])
                             print("moving to position START, pouring {} shots".format(d[1]))
-                            #machine.resetPosition()
+                            machine.resetPosition()
                             for shot in range(d[1]):
-                            #   machine.openMixer(drinkPos)
                                 print("pouring shot {}".format(shot))
+                                machine.openMixer(drinkPos+1)
                             time.sleep(1)
 
                     
@@ -122,7 +124,7 @@ try:
 except KeyboardInterrupt:
     print("Shutting down")
     network.shutdown()
-    #machine.cleanup()
+    machine.cleanup()
     io.writeFile(pin,drinks,mixes,activeDrinks,activeMixers, drinkPositions)
     io.closeFile()
 

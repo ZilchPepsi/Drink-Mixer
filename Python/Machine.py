@@ -29,8 +29,8 @@ class Machine:
     relayDrinkPins = [17, 18, 22, 23, 24, 27]
     relayMixerPins = [9,10,11,25]
 
-    drinkWaitTime = 5 #TODO - needs testing
-    mixerWaitTime = 2 #TODO - needs testing
+    drinkWaitTime = 2 #TODO - needs testing
+    mixerWaitTime = 1 #TODO - needs testing
 
     maxSpeed = .0004 #max speed of stepper motor
     #enable low is right, high is left
@@ -59,9 +59,9 @@ class Machine:
         time.sleep(1)
     #origin 1
     def openMixer(self, drinkNum):
-        GPIO.output(relayMixerPins[drinkNum-1], GPIO.LOW)
-        time.sleep(mixerWaitTime)
-        GPIO.output(relayMixerPins[drinkNum-1],  GPIO.HIGH)
+        GPIO.output(self.relayMixerPins[drinkNum-1], GPIO.LOW)
+        time.sleep(self.mixerWaitTime)
+        GPIO.output(self.relayMixerPins[drinkNum-1],  GPIO.HIGH)
         time.sleep(1)
 
     #rotates stepper motor 'rotations' times
@@ -164,7 +164,7 @@ def moveRight_debug(maxS, startSpeed = .001):
             if curSpeed < maxS:
                 curSpeed = maxS
 
-
+'''
 mac = Machine()
 #def setDrinkPosition(self, drinkNum, pos):
 mac.setDrinkPosition(1, 6200)
@@ -179,4 +179,4 @@ mac.openAlc(1)
 time.sleep(1)
 mac.moveTrayP(0)
 mac.cleanup()
-
+'''
