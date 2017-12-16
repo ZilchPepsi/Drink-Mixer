@@ -30,7 +30,7 @@ class Machine:
     relayMixerPins = [9,10,11,25]
 
     drinkWaitTime = 2 #TODO - needs testing
-    mixerWaitTime = 1 #TODO - needs testing
+    mixerWaitTime = 2.5 #TODO - needs testing
 
     maxSpeed = .0004 #max speed of stepper motor
     #enable low is right, high is left
@@ -56,7 +56,7 @@ class Machine:
         GPIO.output(self.relayDrinkPins[drinkNum-1], GPIO.LOW)
         time.sleep(self.drinkWaitTime)
         GPIO.output(self.relayDrinkPins[drinkNum-1],  GPIO.HIGH)
-        time.sleep(1)
+        time.sleep(self.drinkWaitTime)
     #origin 1
     def openMixer(self, drinkNum):
         GPIO.output(self.relayMixerPins[drinkNum-1], GPIO.LOW)
