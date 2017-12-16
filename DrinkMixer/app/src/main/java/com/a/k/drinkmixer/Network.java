@@ -16,7 +16,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -27,10 +30,9 @@ import java.util.Arrays;
 public class Network extends AsyncTask<WorkOrder, Integer , Integer>/*params, progress, result*/
 {
 
-
-    public static final String SERVER_IP = "192.168.0.30";//TODO if grabbing static IP then won't work on other networks
+    public static final int TIMEOUT = 50;//in milliseconds
     public static final int SERVER_PORT = 1234;
-
+    private static String SERVER_IP = null;
    /*
     bit masks
     */
@@ -38,24 +40,19 @@ public class Network extends AsyncTask<WorkOrder, Integer , Integer>/*params, pr
     public static final byte ADD_MIX = 1;
     public static final byte MODIFY_MIX = 2;
     public static final byte DELETE_MIX = 3;
-
     public static final byte GET_DRINKS = 11;
     public static final byte ADD_DRINK = 4;
     public static final byte DELETE_DRINK = 5;
-
     //machine info
     public static final byte GET_ACTIVE_DRINKS = 12;
     public static final byte SET_ACTIVE_DRINKS = 13;
-
     public static final byte INIT = 6;
     public static final byte INIT_CONFIRM = 8; // not used
-
     public static final byte HELLO = 9;
     public static final byte GOODBYE = 10;
     /*
     END bit masks
      */
-
     private Socket socket;
 
     public Network()
@@ -89,21 +86,64 @@ public class Network extends AsyncTask<WorkOrder, Integer , Integer>/*params, pr
 
     private boolean connect()
     {
-        Log.d("Network","starting network connection");
-        int attempts = 0;
-        while(attempts< 3)
+
+        Log.d("Network","In Connect()");
+        if(SERVER_IP == null)
         {
-            try
+            Log.d("Network","attempting IP lookup");
+
+            int[] ipAddr = {192, 168, 0, 0};
+            InetAddress workingAddress;
+            //find server
+            tertiaryLoop:
+            for (int y = 0; y < 3; y++)
             {
-                socket = new Socket(SERVER_IP, SERVER_PORT);
-                break;
-            }
-            catch (IOException e)
-            {
-                Log.d("Network", "Could not connect to server, attempt" + attempts);
-                attempts++;
+                for (int x = 0; x <= 255; x++)
+                {
+                    socket = new Socket();
+                    try
+                    {
+                        String address = Arrays.toString(ipAddr).replace(',','.').replaceAll(" ","");
+                        address = address.substring(1, address.length()-1);
+
+                            try
+                            {
+                                socket.connect(new InetSocketAddress(address, SERVER_PORT), TIMEOUT);
+                            }
+                            catch (IOException e)
+                            {
+                                socket.close();
+                            }
+                        if (socket.isConnected())
+                        {
+                            Log.d("Network", "found connection at "+address);
+                            Network.SERVER_IP = address;
+                            break tertiaryLoop;
+                        }
+                    }
+                    catch (IOException e)
+                    {
+                        Log.d("Network", "IOException while finding an acceptable IP address");
+                    }
+                    ipAddr[3]++;
+                }
+                ipAddr[2]++;
             }
         }
+        else
+        {
+            int attempts = 0;
+            while (attempts < 3) {
+                try {
+                    socket = new Socket(SERVER_IP, SERVER_PORT);
+                    break;
+                } catch (IOException e) {
+                    Log.d("Network", "Could not connect to " + SERVER_IP + " attempt " + attempts);
+                    attempts++;
+                }
+            }
+        }
+
         if(!socket.isConnected())
         {
             Log.d("Network", "I'm not connected, cancelling");
@@ -249,126 +289,101 @@ public class Network extends AsyncTask<WorkOrder, Integer , Integer>/*params, pr
         Drink[] activeDrinks = (Drink[]) workOrder.data.get(2);
 
 
-        if(!connect())
-        {
+        if(!connect()) {
             cancel(true);
         }
+        else {
+            try {
+                Log.d("Network", "sending hello..." + HELLO);
+                socket.getOutputStream().write(new byte[]{HELLO});
+                socket.getOutputStream().flush();
+            } catch (IOException e) {
+            }
 
+            //getting startup data
+            InputStream in = null;
+            try {
+                in = socket.getInputStream();
+            } catch (IOException e) {
 
-        try
-        {
-            Log.d("Network", "sending hello..."+HELLO);
-            socket.getOutputStream().write(new byte[]{HELLO});
-            socket.getOutputStream().flush();
-        }
-        catch(IOException e) {}
-
-        //getting startup data
-        InputStream in = null;
-        try
-        {
-            in = socket.getInputStream();
-        }
-        catch (IOException e)
-        {
-
-        }
-        try
-        {
-            Log.d("Network", "waiting for init string");
-            while(in.available() ==0)
-                    try
-                    {
+            }
+            try {
+                Log.d("Network", "waiting for init string");
+                while (in.available() == 0)
+                    try {
                         Thread.sleep(50);
-                    }
-                    catch(InterruptedException e)
-                    {
+                    } catch (InterruptedException e) {
 
                     }
-        }
-        catch (IOException e)
-        {
+            } catch (IOException e) {
 
-        }
+            }
 
-        byte[] initStuff = null;
-        try
-        {
-            initStuff = new byte[in.available()];
-            in.read(initStuff);
-        }
-        catch(IOException e)
-        {
+            byte[] initStuff = null;
+            try {
+                initStuff = new byte[in.available()];
+                in.read(initStuff);
+            } catch (IOException e) {
 
-        }
+            }
 
-        String initS = "";
-        for( int x= 0; x< initStuff.length; x++)
-        {
-            initS += (char)initStuff[x];
-        }
+            String initS = "";
+            for (int x = 0; x < initStuff.length; x++) {
+                initS += (char) initStuff[x];
+            }
 
-        String[] s = initS.split(":");
+            String[] s = initS.split(":");
 
 
-        if(!s[0].equals(""+INIT))
-        {
-            cancel(true);
-        }
-        //set pin
-        MainActivity.setPin(Integer.parseInt(s[1]));
+            if (!s[0].equals("" + INIT)) {
+                cancel(true);
+            }
+            //set pin
+            MainActivity.setPin(Integer.parseInt(s[1]));
 
-        //set drinks
-        int drinkCount = Integer.parseInt(s[2]);
-        int pos = 3;
-        for(; pos< drinkCount*2+3;  pos+=2)
-        {
-            drinks.add(new Drink(s[pos], Boolean.parseBoolean(s[pos+1])));
-        }
+            //set drinks
+            int drinkCount = Integer.parseInt(s[2]);
+            int pos = 3;
+            for (; pos < drinkCount * 2 + 3; pos += 2) {
+                drinks.add(new Drink(s[pos], Boolean.parseBoolean(s[pos + 1])));
+            }
 
-        int numMixes = Integer.parseInt(s[pos]);
-        pos++;
-
-        //set mixes
-        for(int x =0; x< numMixes; x++)
-        {
-            Mix m = new Mix(s[pos]);
+            int numMixes = Integer.parseInt(s[pos]);
             pos++;
-            drinkCount = Integer.parseInt(s[pos]);
-            pos++;
-            for (int y = 0; y < drinkCount; y++)
-            {
-                Drink d = findDrink(drinks, s[pos]);
-                if (d != null)
-                {
-                    m.addDrink(d, Integer.parseInt(s[pos + 1]));
+
+            //set mixes
+            for (int x = 0; x < numMixes; x++) {
+                Mix m = new Mix(s[pos]);
+                pos++;
+                drinkCount = Integer.parseInt(s[pos]);
+                pos++;
+                for (int y = 0; y < drinkCount; y++) {
+                    Drink d = findDrink(drinks, s[pos]);
+                    if (d != null) {
+                        m.addDrink(d, Integer.parseInt(s[pos + 1]));
+                    }
+                    pos += 2;
                 }
-                pos += 2;
+                mixes.add(m);
             }
-            mixes.add(m);
-        }
-        //set activeDrinks
-        for(int x =0; x< Machine.BAY_COUNT; x++)
-        {
-            if(s[pos].equals("None"))
-                activeDrinks[x] = null;
-            else
-            {
-                Drink d = findDrink(drinks, s[pos]);
-                activeDrinks[x] = d;
+            //set activeDrinks
+            for (int x = 0; x < Machine.BAY_COUNT; x++) {
+                if (s[pos].equals("None"))
+                    activeDrinks[x] = null;
+                else {
+                    Drink d = findDrink(drinks, s[pos]);
+                    activeDrinks[x] = d;
+                }
+                pos++;
             }
-            pos++;
-        }
-        Log.d("Network", "finished init, shutting down socket");
-        Log.d("ActivityState", "finished init, shutting down socket");
+            Log.d("Network", "finished init, shutting down socket");
+            Log.d("ActivityState", "finished init, shutting down socket");
 
-        try
-        {
-            socket.close();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
